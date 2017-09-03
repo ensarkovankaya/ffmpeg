@@ -10,7 +10,7 @@ DEFAULT_LOG_LEVELS = [
     ("info", _("Info")),
     ("verbose", _("Verbose")),
     ("debug", _("Debug")),
-    ("trace", _("Trace")),
+    ("trace", _("Trace"))
 ]
 
 LOG_LEVELS = getattr(settings, "FFMPEG_LOG_LEVELS", DEFAULT_LOG_LEVELS)
