@@ -2,7 +2,6 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 DEFAULT_ASPECT_RATIOS = [
-    (None, _("Not Specified")),
     (4 / 3, "4:3"),
     (16 / 9, "16:9")
 ]
@@ -10,7 +9,7 @@ DEFAULT_ASPECT_RATIOS = [
 ASPECT_RATIOS = getattr(settings, "FFMPEG_ASPECT_RATIOS", DEFAULT_ASPECT_RATIOS)
 
 # https://ffmpeg.org/ffmpeg-utils.html#Video-size
-DEFAULT_VIDEO_SIZES = [(None, _("Not Specified")), ('720x480', 'NTSC 720x480'), ('720x576', 'PAL 720x576'),
+DEFAULT_VIDEO_SIZES = [('720x480', 'NTSC 720x480'), ('720x576', 'PAL 720x576'),
                        ('352x240', 'QNTSC 352x240'), ('352x288', 'QPAL 352x288'), ('640x480', 'SNTSC 640x480'),
                        ('768x576', 'SPAL 768x576'), ('352x240', 'FILM 352x240'), ('352x240', 'NTSC-FILM 352x240'),
                        ('128x96', 'SQCIF 128x96'), ('176x144', 'QCIF 176x144'), ('352x288', 'CIF 352x288'),
@@ -35,7 +34,7 @@ DEFAULT_VIDEO_SIZES = [(None, _("Not Specified")), ('720x480', 'NTSC 720x480'), 
 VIDEO_SIZES = getattr(settings, "FFMPEG_VIDEO_SIZES", DEFAULT_VIDEO_SIZES)
 
 # https://ffmpeg.org/ffmpeg-utils.html#Video-rate
-DEFAULT_VIDEO_RATES = [(None, _("Not Specified")), ('ntsc', 'NTSC 30000/1001'), ('pal', 'PAL 25/1'),
+DEFAULT_VIDEO_RATES = [('ntsc', 'NTSC 30000/1001'), ('pal', 'PAL 25/1'),
                        ('qntsc', 'QNTSC 30000/1001'), ('qpal', 'QPAL 25/1'), ('sntsc', 'SNTSC 30000/1001'),
                        ('spal', 'SPAL 25/1'), ('film', 'FILM 24/1'), ('ntsc-film', 'NTSC-FILM 24000/1001')]
 
