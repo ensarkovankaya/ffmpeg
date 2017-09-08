@@ -1,25 +1,55 @@
 # FFmpeg Command Generator
 
-Generates ffmpeg commands in python.
+Generates ffmpeg commands programmatically with python.
 
 ## Requirements
 	- Django
 	- Ffmpeg
 
-## Example
+## Example: Generating 10 Minute Video
 ```
-from ffmpeg.models import BaseCommand
-from django.utils import timezone
+from ffmpeg.generator import Command
+from ffmpeg.utils.codecs import Codec
+from ffmpeg.utils.filters import StreamSpecifier
 import subprocess
 
-# Generating 1 Minute Video
-cmd = BaseCommand(
-    input="input.mp4",
-    output="output.mp4",
-    duration=timezone.timedelta(minutes=1)
-)
+# Generating 10 Minute Video from Another Video
+input = "input.mp4"
+output = "output.mp4"
+duration = "00:10:00"  # 10 minutes
+
+cmd = Command(data={'input': input, 'output': output, 'duration': duration})
+
+# Copy the input video codec
+codec = Codec(data={"copy": True, "stream": StreamSpecifier.Video})
+cmd.add_codec(codec)
+
 cmd.generate(as_string=True) # Returns as string
-"/usr/bin/ffmpeg -i input.mp4 -t 00:01:00 output.mp4"
+"/usr/bin/ffmpeg -i input.mp4 -t 00:10:00 -c:v copy output.mp4"
+
+# Run command
+ps = subprocess.run(cmd.generate(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+```
+
+## Example: Scaling Video
+```
+from ffmpeg.generator import Command
+from ffmpeg.utils.codecs import Codec
+from ffmpeg.utils.filters import StreamSpecifier, ScaleFilter, FOAR
+import subprocess
+
+# Generating 10 Minute Video from Another Video
+input = "input.mp4"
+output = "output.mp4"
+
+cmd = Command(data={'input': input, 'output': output})
+
+# Scale to : 1920x1080
+scale = ScaleFilter(data={"width": 1920, "height": 1080, "foar": FOAR.Decrease})
+cmd.add_filter(scale)
+
+cmd.generate(as_string=True) # Returns as string
+"/usr/bin/ffmpeg -i input.mp4 -filter:v scale=1920x1080:force_original_aspect_ratio=decrease output.mp4"
 
 # Run command
 ps = subprocess.run(cmd.generate(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
