@@ -2,14 +2,15 @@ from django import forms
 from django.utils.translation import ugettext as _
 
 from ffmpeg.utils.ffmpeg import FFMPEG_PATH
-from .utils.base import BaseCommand, BaseFilter
+from .utils.base import BaseCommand, BaseFilter, EnumChoiceField
 from .utils.codecs import Codec
-from .utils.log import LOG_LEVELS
+from .utils.log import LogLevel
 
 
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
-        self.args.append(FFMPEG_PATH)
+        path = kwargs.pop("ffmpeg", FFMPEG_PATH)
+        self.args.append(path)
         super(Command, self).__init__(*args, **kwargs)
 
     # Main Options
@@ -18,7 +19,7 @@ class Command(BaseCommand):
     output = forms.CharField(label=_("Output File Path"), required=True)
 
     # -loglevel
-    loglevel = forms.ChoiceField(choices=LOG_LEVELS, required=False, label=_("Log Level"))
+    loglevel = EnumChoiceField(choices=LogLevel, required=False, label=_("Log Level"))
 
     # -y : Overwrite output files without asking.
     overwrite = forms.NullBooleanField(required=False, label=_("Overwrite"))

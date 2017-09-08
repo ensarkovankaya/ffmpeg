@@ -17,7 +17,8 @@ class Codec(BaseFilter):
 
     def generate(self, as_str: bool = False):
         self.validate()
-        self.args = ["-c:" + str(self.cleaned_data['stream'])]
+        stream = self.cleaned_data['stream']
+        self.args = ["-c:" + str(stream) if stream else "-c"]
         if self.cleaned_data['copy']:
             self.args.append("copy")
         else:

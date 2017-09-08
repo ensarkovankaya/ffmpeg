@@ -1,12 +1,31 @@
+import inspect
 from enum import Enum
 
 from django import forms
 
 
-class StreamSpecifier(Enum):
+class ChoiceEnum(Enum):
+    @classmethod
+    def choices(cls):
+        return [(v.value, v.name) for v in cls]
+
+    def __str__(self):
+        return self.value
+
+
+class StreamSpecifier(ChoiceEnum):
     Video = "v"
     Audio = "a"
     Subtitle = "s"
+
+
+class EnumChoiceField(forms.ChoiceField):
+    def __init__(self, *args, **kwargs):
+        # Unpack Enum
+        choices = kwargs.get('choices', None)
+        if choices and inspect.isclass(choices) and issubclass(choices, ChoiceEnum):
+            kwargs['choices'] = choices.choices()
+        super(EnumChoiceField, self).__init__(*args, **kwargs)
 
 
 class BaseCommand(forms.Form):
@@ -24,5 +43,18 @@ class BaseCommand(forms.Form):
 
 
 class BaseFilter(BaseCommand):
-    stream = forms.ChoiceField(choices=[(s.value, s.name) for s in StreamSpecifier],
-                               initial=StreamSpecifier.Video.value, required=True)
+    stream = EnumChoiceField(choices=StreamSpecifier, required=False)
+
+
+def unrap_kwargs(**kwargs):
+    # For Enums extract value for keys
+    data: dict = kwargs.get('data', None)
+    new_data = {}
+    if data and isinstance(data, dict):
+        for k, v in data.items():
+            if inspect.isclass(v) and issubclass(v, Enum):
+                new_data[k] = v.value
+            else:
+                new_data[k] = v
+        kwargs['data'] = new_data
+    return kwargs
