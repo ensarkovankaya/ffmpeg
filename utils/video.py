@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 DEFAULT_ASPECT_RATIOS = [
     (4 / 3, "4:3"),

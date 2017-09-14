@@ -5,6 +5,9 @@ from .ffmpeg import get_codecs
 
 
 class Codec(BaseFilter):
+    def __init__(self, **kwargs):
+        super(Codec, self).__init__(data=kwargs)
+
     codec = forms.ChoiceField(choices=[(c['name'], c['name']) for c in get_codecs()], required=False)
     copy = forms.BooleanField(initial=False, required=False)
     before_input = forms.BooleanField(initial=False, required=False)
@@ -12,15 +15,14 @@ class Codec(BaseFilter):
     def clean(self):
         if not self.cleaned_data['copy'] and not self.cleaned_data['codec']:
             raise forms.ValidationError("Codec is not defined.")
-
         return super(Codec, self).clean()
 
-    def generate(self, as_str: bool = False):
+    def generate(self, as_str: bool = True):
         self.validate()
         stream = self.cleaned_data['stream']
-        self.args = ["-c:" + str(stream) if stream else "-c"]
+        args = ["-c:" + str(stream) if stream else "-c"]
         if self.cleaned_data['copy']:
-            self.args.append("copy")
+            args.append("copy")
         else:
-            self.args.append(self.cleaned_data['codec'])
-        return " ".join(self.args) if as_str else self.args
+            args.append(self.cleaned_data['codec'])
+        return " ".join(args) if as_str else args

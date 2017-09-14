@@ -1,5 +1,5 @@
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 from ffmpeg.utils.ffmpeg import FFMPEG_PATH
 from .utils.base import BaseCommand, BaseFilter, EnumChoiceField
@@ -8,10 +8,11 @@ from .utils.log import LogLevel
 
 
 class Command(BaseCommand):
-    def __init__(self, *args, **kwargs):
-        path = kwargs.pop("ffmpeg", FFMPEG_PATH)
-        self.args.append(path)
-        super(Command, self).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        self.args = []
+        self.codecs = []
+        self.filters = []
+        super(Command, self).__init__(data=kwargs)
 
     # Main Options
     # -i
@@ -85,20 +86,26 @@ class Command(BaseCommand):
 
     def _add_filters(self):
         for flt in self.filters:
-            self.args.append(flt.generate(as_str=True))
+            self.args.append(flt.generate())
 
     def _add_codecs(self, before=False):
         for codec in self.codecs:
             if before == codec.cleaned_data['before_input']:
-                self.args.append(codec.generate(as_str=True))
+                self.args.append(codec.generate())
 
     def _add_aspect(self):
         self.args.append("-aspect")
         self.args.append(str(self.cleaned_data['aspect']))
 
+    @staticmethod
+    def _normalize(val: str):
+        val = val.replace('"', '\\"')
+        val = val.replace("'", "\\'")
+        return val
+
     def _add_input_file(self):
         self.args.append("-i")
-        self.args.append(self.cleaned_data['input'])
+        self.args.append('"' + self._normalize(str(self.cleaned_data['input'])) + '"')
 
     def _add_log_level(self):
         self.args.append("-loglevel")
@@ -112,7 +119,7 @@ class Command(BaseCommand):
             self.args.append('-y') if ow else self.args.append('-n')
 
     def _add_output_file(self):
-        self.args.append(str(self.cleaned_data['output']))
+        self.args.append('"' + self._normalize(str(self.cleaned_data['output'])) + '"')
 
     def _add_duration(self):
         self.args.append("-t")
@@ -161,12 +168,14 @@ class Command(BaseCommand):
         self.codecs.append(codec)
         return self
 
-    def generate(self, as_str: bool = False):
+    def generate(self, as_str: bool = True) -> str or []:
         """
         Generates FFmpeg command
         :param as_str: Return command as string else it will came as List
         :return: String or List
         """
+        self.args = []
+        self.args.append(FFMPEG_PATH)
         self.validate()
 
         # Before Input Tag

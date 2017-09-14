@@ -18,13 +18,13 @@ input = "input.mp4"
 output = "output.mp4"
 duration = "00:10:00"  # 10 minutes
 
-cmd = Command(data={'input': input, 'output': output, 'duration': duration})
+cmd = Command(input=input, output=output, duration=duration)
 
 # Copy the input video codec
-codec = Codec(data={"copy": True, "stream": StreamSpecifier.Video})
+codec = Codec(copy=True, stream=StreamSpecifier.Video)
 cmd.add_codec(codec)
 
-cmd.generate(as_string=True) # Returns as string
+cmd.generate() # Returns as string
 "/usr/bin/ffmpeg -i input.mp4 -t 00:10:00 -c:v copy output.mp4"
 
 # Run command
@@ -42,13 +42,13 @@ import subprocess
 input = "input.mp4"
 output = "output.mp4"
 
-cmd = Command(data={'input': input, 'output': output})
+cmd = Command(input=input, output=output)
 
 # Scale to : 1920x1080
-scale = ScaleFilter(data={"width": 1920, "height": 1080, "foar": FOAR.Decrease})
+scale = ScaleFilter(width=1920, height=1080, foar=FOAR.Decrease)
 cmd.add_filter(scale)
 
-cmd.generate(as_string=True) # Returns as string
+cmd.generate() # Returns as string
 "/usr/bin/ffmpeg -i input.mp4 -filter:v scale=1920x1080:force_original_aspect_ratio=decrease output.mp4"
 
 # Run command

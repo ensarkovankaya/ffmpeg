@@ -21,11 +21,16 @@ class FFmpegFilter(ChoiceEnum):
 
 
 class BitstreamChannelFilter(BaseFilter):
+    def __init__(self, stream: StreamSpecifier, filters: [FFmpegFilter]):
+        data = {'stream': stream, 'filters': ",".join([f.value for f in filters])}
+        super(BitstreamChannelFilter, self).__init__(data=data)
+
     filters = forms.CharField(max_length=255)
 
-    def generate(self, as_str: bool = False):
-        self.args = ["-bsf:" + self.cleaned_data['stream'], self.cleaned_data['filters']]
-        return " ".join(self.args) if as_str else self.args
+    def generate(self, as_str: bool = True):
+        self.validate()
+        args = ["-bsf:" + self.cleaned_data['stream'], self.cleaned_data['filters']]
+        return " ".join(args) if as_str else args
 
 
 class FOAR(ChoiceEnum):
@@ -43,14 +48,13 @@ class ScaleFilter(BaseFilter):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        # Set default stream as Video
-        data = kwargs.pop('data', None)
-        kwargs['data'] = {}
-        if data and isinstance(data, dict):
-            data['stream'] = StreamSpecifier.Video.value
-            kwargs['data'] = data
-        super(ScaleFilter, self).__init__(*args, **kwargs)
+    def __init__(self, uiw: bool = False, uih: bool = False, kar: bool = False, foar: FOAR = FOAR.Disable, **kwargs):
+        kwargs['uiw'] = uiw
+        kwargs['uih'] = uih
+        kwargs['kar'] = kar
+        kwargs['foar'] = foar
+        kwargs['stream'] = StreamSpecifier.Video
+        super(ScaleFilter, self).__init__(data=kwargs)
 
     width = forms.IntegerField(required=False)  # Output width
     height = forms.IntegerField(required=False)  # Output height
@@ -65,15 +69,15 @@ class ScaleFilter(BaseFilter):
     foar = EnumChoiceField(required=False, choices=FOAR)  # Force Original Aspect Ratio
 
     def clean(self):
-        kar = self.cleaned_data['kar']
-        foar = self.cleaned_data['foar']
-        uiw = self.cleaned_data['uiw']
-        width = self.cleaned_data['width']
-        uih = self.cleaned_data['uih']
-        height = self.cleaned_data['height']
+        kar = self.cleaned_data.get('kar')
+        foar = self.cleaned_data.get('foar')
+        uiw = self.cleaned_data.get('uiw')
+        width = self.cleaned_data.get('width')
+        uih = self.cleaned_data.get('uih')
+        height = self.cleaned_data.get('height')
 
-        if kar and foar:
-            raise forms.ValidationError("KAR and FOAR can not be set True at the same time")
+        if kar and foar != FOAR.Disable:
+            raise forms.ValidationError("KAR and FOAR can not be set define at the same time")
 
         if not uiw and not width:
             raise forms.ValidationError("Please define width or uiw")
@@ -83,7 +87,7 @@ class ScaleFilter(BaseFilter):
 
         return super(ScaleFilter, self).clean()
 
-    def generate(self, as_str: bool = False):
+    def generate(self, as_str: bool = True):
         self.validate()
         width = "iw" if self.cleaned_data['uiw'] else str(self.cleaned_data['width'])
         height = "ih" if self.cleaned_data['uih'] else str(self.cleaned_data['height'])
@@ -98,8 +102,8 @@ class ScaleFilter(BaseFilter):
 
         scale = "scale=" + width + ":" + height
 
-        if self.cleaned_data['foar']:
+        if self.cleaned_data['foar'] != FOAR.Disable:
             scale = scale + ":force_original_aspect_ratio=" + str(self.cleaned_data['foar'])
 
-        self.args = ["-filter:" + self.cleaned_data['stream'], scale]
-        return " ".join(self.args) if as_str else self.args
+        args = ["-filter:" + self.cleaned_data['stream'], scale]
+        return " ".join(args) if as_str else args

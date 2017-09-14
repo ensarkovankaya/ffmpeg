@@ -1,5 +1,4 @@
 import os
-import platform
 import re
 import subprocess
 from logging import getLogger
@@ -8,27 +7,7 @@ from django.conf import settings
 
 logger = getLogger("ffmpeg.utils")
 
-
-def get_ffmpeg_path():
-    """Ask the system to ffmpeg path"""
-    # TODO: Make this Windows compatible
-
-    if platform.system() in ['Linux', 'Darwin']:
-        DEFAULT_FFMPEG_PATH = "/usr/bin/ffmpeg"
-        try:
-            ps = subprocess.run(["which", "ffmpeg"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1,
-                                check=True)
-            path = ps.stdout.decode("utf-8").strip()
-            return path or DEFAULT_FFMPEG_PATH
-        except Exception as err:
-            logger.warning("Could not ask FFmpeg path to the system.\n%s" % err)
-
-    return None
-
-
-FFMPEG_PATH = getattr(settings, "FFMPEG_PATH", None)
-if FFMPEG_PATH is None:
-    FFMPEG_PATH = get_ffmpeg_path()
+FFMPEG_PATH = getattr(settings, "FFMPEG_PATH", "/usr/bin/ffmpeg")
 
 if not os.path.exists(FFMPEG_PATH):
     raise ValueError("FFmpeg not found in system, path: %s" % FFMPEG_PATH)

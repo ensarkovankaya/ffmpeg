@@ -2,15 +2,31 @@ import inspect
 from enum import Enum
 
 from django import forms
+from django.utils.translation import ugettext_lazy as _
 
 
 class ChoiceEnum(Enum):
+    __translatable__ = True
+
     @classmethod
     def choices(cls):
-        return [(v.value, v.name) for v in cls]
+        return [(v.value, _(v.name) if cls.__translatable__ else v.name) for v in cls]
 
     def __str__(self):
-        return self.value
+        return str(self.value)
+
+    def __int__(self):
+        return int(self.value)
+
+    def __eq__(self, other):
+        return self.value == other
+
+    def __hash__(self):
+        return hash(self.__dict__.values())
+
+    @classmethod
+    def values(cls):
+        return [v.value for v in cls]
 
 
 class StreamSpecifier(ChoiceEnum):
@@ -29,15 +45,13 @@ class EnumChoiceField(forms.ChoiceField):
 
 
 class BaseCommand(forms.Form):
-    args = []
-
     def validate(self):
         if not self.is_valid():
             raise ValueError(
                 "%s is not valid.\nData: %s\nErrors: %s" % (self.__class__.__name__, self.data, self.errors))
         return self
 
-    def generate(self, as_str: bool = False):
+    def generate(self, as_str: bool = True):
         """This should generates a string as command run on shell"""
         raise NotImplemented()
 
