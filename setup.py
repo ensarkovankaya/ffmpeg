@@ -12,6 +12,6 @@ setup(name='Ffmpeg Command Generator',
       author='Ensar Kovankaya',
       author_email='ensar@kovankaya.com',
       url='https://github.com/ensarkovankaya/ffmpeg',
-      packages=['utils', 'generator', 'tests'],
+      packages=['ffmpeg'],
       install_requires=['django']
       )
