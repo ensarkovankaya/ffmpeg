@@ -1,10 +1,10 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from ffmpeg.utils.ffmpeg import FFMPEG_PATH
-from .utils.base import BaseCommand, BaseFilter, EnumChoiceField
-from .utils.codecs import Codec
-from .utils.log import LogLevel
+from .ffmpeg import FFMPEG_PATH
+from .utils import BaseCommand, BaseFilter, EnumChoiceField
+from .codecs import Codec
+from .utils import LogLevel
 
 
 class Command(BaseCommand):

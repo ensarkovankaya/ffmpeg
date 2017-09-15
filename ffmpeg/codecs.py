@@ -1,6 +1,6 @@
 from django import forms
 
-from .base import BaseFilter
+from .utils import BaseFilter
 from .ffmpeg import get_codecs
 
 

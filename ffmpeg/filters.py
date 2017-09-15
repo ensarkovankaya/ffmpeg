@@ -1,6 +1,6 @@
 from django import forms
 
-from .base import BaseFilter, StreamSpecifier, EnumChoiceField, ChoiceEnum
+from .utils import BaseFilter, StreamSpecifier, EnumChoiceField, ChoiceEnum
 
 
 class FFmpegFilter(ChoiceEnum):

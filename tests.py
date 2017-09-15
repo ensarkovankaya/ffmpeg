@@ -1,8 +1,9 @@
 from django.test import TestCase
 
 from ffmpeg.generator import Command
-from ffmpeg.utils.codecs import Codec
-from ffmpeg.utils.filters import StreamSpecifier, BitstreamChannelFilter, FFmpegFilter, ScaleFilter, FOAR
+from ffmpeg.codecs import Codec
+from ffmpeg.filters import BitstreamChannelFilter, FFmpegFilter, ScaleFilter, FOAR
+from ffmpeg.utils import StreamSpecifier
 
 
 class FFmpegTestCase(TestCase):
